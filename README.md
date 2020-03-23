@@ -1,10 +1,14 @@
-采集Go进程的各项内存指标（包含Go runtime内存管理相关的，以及RSS等），并按时间维度绘制成折线图，可以通过网页实时查看。配合原有Go pprof工具，可以快速监控和分析Go进程的内存使用情况。
+采集Go进程的各项内存指标绘制成图，可通过网页实时查看。
+可以生成火焰图，可以查看函数分配内存情况。
 
 ```golang
 import "github.com/lzxm160/gomemanalysis/core"
 
 core.Start()
 ```
+build webui
+
+```./build.sh```
 
 ```shell
 ./webui
