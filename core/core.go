@@ -49,18 +49,12 @@ func start(modOptions ...ModOption) error {
 	for _, mo := range modOptions {
 		mo(&option)
 	}
-
 	c, err := NewCollect(option.CaptureIntervalSec, option.DumpDir, option.ServiceName)
 	if err != nil {
 		return err
 	}
-
 	go func() {
-		infoC := c.doAsync()
-		for {
-			info := <-infoC
-			d.do(info)
-		}
+		c.collect()
 	}()
 
 	return nil

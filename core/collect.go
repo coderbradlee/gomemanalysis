@@ -33,24 +33,22 @@ func NewCollect(intervalSec int, dir string, serviceName string) (*collect, erro
 	}, nil
 }
 
-func (c *collect) doAsync() chan Info {
-	ret := make(chan Info)
+func (c *collect) collect() {
 	go func() {
 		p := process.Process{
 			Pid: int32(os.Getpid()),
 		}
-
-		ret <- c.do(p)
-
 		t := time.Tick(time.Second * time.Duration(c.IntervalSec))
+		errChan := make(chan error, 1)
 		for {
 			select {
 			case <-t:
-				ret <- c.do(p)
+				errChan <- c.do(p)
+			case err := <-errChan:
+				fmt.Println(err)
 			}
 		}
 	}()
-	return ret
 }
 
 func (c *collect) do(p process.Process) error {
@@ -58,7 +56,7 @@ func (c *collect) do(p process.Process) error {
 	runtime.ReadMemStats(&ms)
 	mis, _ := p.MemoryInfo()
 
-	info := Info{
+	info := &Info{
 		Timestamp:    time.Now().Unix(),
 		Sys:          ms.Sys,
 		HeapSys:      ms.HeapSys,
@@ -69,11 +67,6 @@ func (c *collect) do(p process.Process) error {
 		VMS:          mis.VMS,
 		RSS:          mis.RSS,
 	}
-
-	return c.save(info)
-}
-
-func (c *collect) save(info Info) error {
 	raw, _ := json.Marshal(&info)
 	_, err := c.fp.Write(raw)
 	if err != nil {
