@@ -38,11 +38,10 @@ var memUnitBrief []string
 
 func main() {
 	dir = flag.String("dir", "/tmp/gomemanalysis/", "dir of pprofplus dump file")
-	serviceName = flag.String("service", "gomemanalysis", "service name")
 	addr = flag.String("addr", ":80", "dashboard addr")
 	uri = flag.String("uri", "/", "web uri")
 	flag.Parse()
-	fmt.Printf("dir=%s, service=%s, addr=%s, uri=%s\n", *dir, *serviceName, *addr, *uri)
+	fmt.Println("start....")
 
 	http.HandleFunc(*uri, requestHandler)
 	err := http.ListenAndServe(*addr, nil)

@@ -12,16 +12,16 @@ import (
 )
 
 type collect struct {
-	IntervalSec int
-	fp          *os.File
+	intervalSec int
+	file        *os.File
 }
 
-func NewCollect(intervalSec int, dir string, serviceName string) (*collect, error) {
+func NewCollect(intervalSec int, dir string) (*collect, error) {
 	if err := os.MkdirAll(dir, 0666); err != nil {
 		return nil, err
 	}
-	filename := fmt.Sprintf("%s_%d_%s.dump",
-		serviceName, os.Getpid(), time.Now().Format("20060102150405"))
+	filename := fmt.Sprintf("gomemanalysis_%d_%s.dat",
+		os.Getpid(), time.Now().Format("20060102150405"))
 	filename = path.Join(dir, filename)
 
 	fp, err := os.Create(filename)
@@ -29,7 +29,7 @@ func NewCollect(intervalSec int, dir string, serviceName string) (*collect, erro
 		return nil, err
 	}
 	return &collect{
-		IntervalSec: intervalSec, fp: fp,
+		intervalSec: intervalSec, file: fp,
 	}, nil
 }
 
@@ -38,7 +38,7 @@ func (c *collect) collect() {
 		p := process.Process{
 			Pid: int32(os.Getpid()),
 		}
-		t := time.Tick(time.Second * time.Duration(c.IntervalSec))
+		t := time.Tick(time.Second * time.Duration(c.intervalSec))
 		errChan := make(chan error, 1)
 		for {
 			select {
@@ -68,13 +68,13 @@ func (c *collect) do(p process.Process) error {
 		RSS:          mis.RSS,
 	}
 	raw, _ := json.Marshal(&info)
-	_, err := c.fp.Write(raw)
+	_, err := c.file.Write(raw)
 	if err != nil {
 		return err
 	}
-	_, err = c.fp.Write([]byte{'\n'})
+	_, err = c.file.Write([]byte{'\n'})
 	if err != nil {
 		return err
 	}
-	return c.fp.Sync()
+	return c.file.Sync()
 }

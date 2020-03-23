@@ -7,15 +7,13 @@ import (
 )
 
 type Option struct {
-	CaptureIntervalSec int
-	DumpDir            string
-	ServiceName        string
+	IntervalSec int
+	Dir         string
 }
 
-var option = Option{
-	CaptureIntervalSec: 5,
-	DumpDir:            "/tmp/gomemanalysis/",
-	ServiceName:        "gomemanalysis",
+var defaultOption = Option{
+	IntervalSec: 10,
+	Dir:         "/tmp/gomemanalysis/",
 }
 
 type Info struct {
@@ -32,24 +30,24 @@ type Info struct {
 	RSS uint64 `json:"rss"`
 }
 
-type ModOption func(option *Option)
+type WithOption func(option *Option)
 
 var once sync.Once
 
-func Start(modOptions ...ModOption) error {
+func Start(opts ...WithOption) error {
 	var err error
 	once.Do(func() {
-		err = start(modOptions...)
+		err = start(opts...)
 	})
 	http.ListenAndServe(":8081", nil)
 	return err
 }
 
-func start(modOptions ...ModOption) error {
-	for _, mo := range modOptions {
-		mo(&option)
+func start(opts ...WithOption) error {
+	for _, mo := range opts {
+		mo(&defaultOption)
 	}
-	c, err := NewCollect(option.CaptureIntervalSec, option.DumpDir, option.ServiceName)
+	c, err := NewCollect(defaultOption.IntervalSec, defaultOption.Dir)
 	if err != nil {
 		return err
 	}
