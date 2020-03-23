@@ -67,10 +67,13 @@ func getInfos() ([]core.Info, error) {
 			return nil
 		}
 		pidTime := strings.TrimSuffix(strings.TrimPrefix(info.Name(), prefix), suffix)
+		fmt.Println("pidTime:", pidTime)
 		pid_time := strings.Split(pidTime, "_")
 		if len(pid_time) != 2 {
 			return nil
 		}
+		fmt.Println("pid_time[0]:", pid_time[0])
+		fmt.Println("pid_time[1]:", pid_time[1])
 		t, err := time.Parse("20060102150405", pid_time[1])
 		if err != nil {
 			return nil

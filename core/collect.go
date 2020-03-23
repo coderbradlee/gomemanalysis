@@ -43,7 +43,11 @@ func (c *collect) collect() {
 		for {
 			select {
 			case <-t:
-				errChan <- c.do(p)
+				e := c.do(p)
+				if e != nil {
+					errChan <- e
+				}
+
 			case err := <-errChan:
 				fmt.Println(err)
 			}
