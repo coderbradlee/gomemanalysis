@@ -17,10 +17,9 @@ import (
 )
 
 var (
-	dir         *string
-	serviceName *string
-	addr        *string
-	uri         *string
+	dir  *string
+	addr *string
+	uri  *string
 
 	memUnit = MemUnit(MemUnitMByte)
 )
@@ -28,6 +27,8 @@ var (
 type MemUnit int
 
 const (
+	prefix              = "gomemanalysis_"
+	suffix              = ".dat"
 	MemUnitByte MemUnit = iota + 1
 	MemUnitKByte
 	MemUnitMByte
@@ -62,18 +63,15 @@ func getInfos() ([]core.Info, error) {
 		if info.IsDir() {
 			return nil
 		}
-		if !strings.HasPrefix(info.Name(), *serviceName) || !strings.HasSuffix(info.Name(), ".dump") {
+		if !strings.HasPrefix(info.Name(), prefix) || !strings.HasSuffix(info.Name(), suffix) {
 			return nil
 		}
-		ss := strings.Split(info.Name(), ".")
-		if len(ss) != 2 {
+		pidTime := strings.TrimSuffix(strings.TrimPrefix(info.Name(), prefix), suffix)
+		pid_time := strings.Split(pidTime, "_")
+		if len(pid_time) != 2 {
 			return nil
 		}
-		ss = strings.Split(ss[0], "_")
-		if len(ss) != 3 {
-			return nil
-		}
-		t, err := time.Parse("20060102150405", ss[2])
+		t, err := time.Parse("20060102150405", pid_time[1])
 		if err != nil {
 			return nil
 		}
