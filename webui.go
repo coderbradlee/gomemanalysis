@@ -47,7 +47,7 @@ func main() {
 }
 
 func handler(writer http.ResponseWriter, _ *http.Request) {
-	msgs, err := getInfos()
+	msgs, err := readFromFiles()
 	if err != nil {
 		return
 	}
@@ -80,7 +80,7 @@ func handler(writer http.ResponseWriter, _ *http.Request) {
 	line.SetGlobalOptions(
 		charts.InitOpts{PageTitle: "gomemanalysis", Theme: charts.ThemeType.Infographic},
 	)
-	fmt.Println("defaultUnit:", defaultUnit)
+
 	line.Title = "unit：" + unitString[defaultUnit]
 	line.AddXAxis(t)
 	opts := charts.LineOpts{Smooth: true}
@@ -95,7 +95,7 @@ func handler(writer http.ResponseWriter, _ *http.Request) {
 	line.Render(writer)
 }
 
-func getInfos() ([]core.Msg, error) {
+func readFromFiles() ([]core.Msg, error) {
 	var filename string
 	var latest int64
 
