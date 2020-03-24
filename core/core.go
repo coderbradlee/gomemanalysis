@@ -6,19 +6,18 @@ import (
 	"sync"
 )
 
-type Option struct {
-	IntervalSec int
-	Dir         string
+type Cfg struct {
+	Interval int
+	Dir      string
 }
 
-var defaultOption = Option{
-	IntervalSec: 10,
-	Dir:         "/tmp/gomemanalysis/",
+var defaultCfg = Cfg{
+	Interval: 10,
+	Dir:      "/tmp/gomemanalysis/",
 }
 
-type Info struct {
-	Timestamp int64
-
+type Msg struct {
+	Timestamp    int64  `json:"timestamp"`
 	Sys          uint64 `json:"sys"`
 	HeapSys      uint64 `json:"heapsys"`
 	HeapAlloc    uint64 `json:"heapalloc"`
@@ -30,30 +29,29 @@ type Info struct {
 	RSS uint64 `json:"rss"`
 }
 
-type WithOption func(option *Option)
+type WithCfg func(cfg *Cfg)
 
 var once sync.Once
 
-func Start(opts ...WithOption) error {
+func Start(cfgs ...WithCfg) error {
 	var err error
 	once.Do(func() {
-		err = start(opts...)
+		err = start(cfgs...)
 	})
 	http.ListenAndServe(":8081", nil)
 	return err
 }
 
-func start(opts ...WithOption) error {
-	for _, mo := range opts {
-		mo(&defaultOption)
+func start(cfgs ...WithCfg) error {
+	for _, cfg := range cfgs {
+		cfg(&defaultCfg)
 	}
-	c, err := NewCollect(defaultOption.IntervalSec, defaultOption.Dir)
+	c, err := NewCollect(defaultCfg.Interval, defaultCfg.Dir)
 	if err != nil {
 		return err
 	}
 	go func() {
 		c.collect()
 	}()
-
 	return nil
 }

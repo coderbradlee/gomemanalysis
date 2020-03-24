@@ -12,8 +12,8 @@ import (
 )
 
 type collect struct {
-	intervalSec int
-	file        *os.File
+	interval int
+	file     *os.File
 }
 
 func NewCollect(intervalSec int, dir string) (*collect, error) {
@@ -29,7 +29,7 @@ func NewCollect(intervalSec int, dir string) (*collect, error) {
 		return nil, err
 	}
 	return &collect{
-		intervalSec: intervalSec, file: fp,
+		interval: intervalSec, file: fp,
 	}, nil
 }
 
@@ -38,16 +38,15 @@ func (c *collect) collect() {
 		p := process.Process{
 			Pid: int32(os.Getpid()),
 		}
-		t := time.Tick(time.Second * time.Duration(c.intervalSec))
+		t := time.Tick(time.Second * time.Duration(c.interval))
 		errChan := make(chan error, 1)
 		for {
 			select {
 			case <-t:
-				e := c.do(p)
+				e := c.save(p)
 				if e != nil {
 					errChan <- e
 				}
-
 			case err := <-errChan:
 				fmt.Println(err)
 			}
@@ -55,12 +54,11 @@ func (c *collect) collect() {
 	}()
 }
 
-func (c *collect) do(p process.Process) error {
+func (c *collect) save(p process.Process) error {
 	var ms runtime.MemStats
 	runtime.ReadMemStats(&ms)
 	mis, _ := p.MemoryInfo()
-
-	info := &Info{
+	raw, err := json.Marshal(&Msg{
 		Timestamp:    time.Now().Unix(),
 		Sys:          ms.Sys,
 		HeapSys:      ms.HeapSys,
@@ -70,9 +68,11 @@ func (c *collect) do(p process.Process) error {
 		HeapIdle:     ms.HeapIdle,
 		VMS:          mis.VMS,
 		RSS:          mis.RSS,
+	})
+	if err != nil {
+		return err
 	}
-	raw, _ := json.Marshal(&info)
-	_, err := c.file.Write(raw)
+	_, err = c.file.Write(raw)
 	if err != nil {
 		return err
 	}
