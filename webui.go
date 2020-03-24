@@ -21,15 +21,15 @@ var (
 	addr *string
 	uri  *string
 
-	defaultUnit = UnitMByte
+	defaultUnit = MBytes
 	unitString  = []string{"Byte", "KByte", "MByte", "GByte"}
 )
 
 const (
-	UnitByte = iota
-	UnitKByte
-	UnitMByte
-	UnitGByte
+	Bytes = iota
+	KBytes
+	MBytes
+	GBytes
 	prefix = "gomemanalysis_"
 	suffix = ".dat"
 )
@@ -155,13 +155,13 @@ func readFile(file string) ([]core.Msg, error) {
 
 func formatMemWithUnit(nByte uint64, unit int) float64 {
 	switch unit {
-	case UnitByte:
+	case Bytes:
 		return float64(nByte)
-	case UnitKByte:
+	case KBytes:
 		return float64(nByte) / 1024
-	case UnitMByte:
+	case MBytes:
 		return float64(nByte) / 1024 / 1024
-	case UnitGByte:
+	case GBytes:
 		return float64(nByte) / 1024 / 1024
 	default:
 		return 0
