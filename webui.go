@@ -26,12 +26,12 @@ var (
 )
 
 const (
-	prefix   = "gomemanalysis_"
-	suffix   = ".dat"
 	UnitByte = iota
 	UnitKByte
 	UnitMByte
 	UnitGByte
+	prefix = "gomemanalysis_"
+	suffix = ".dat"
 )
 
 func main() {
