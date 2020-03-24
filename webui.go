@@ -47,7 +47,7 @@ func main() {
 }
 
 func handler(writer http.ResponseWriter, _ *http.Request) {
-	infos, err := getInfos()
+	msgs, err := getInfos()
 	if err != nil {
 		return
 	}
@@ -64,22 +64,23 @@ func handler(writer http.ResponseWriter, _ *http.Request) {
 		RSS          []float64
 	)
 
-	for _, info := range infos {
-		t = append(t, time.Unix(info.Timestamp, 0).Format("2006-01-02 15:04:05"))
-		sys = append(sys, formatMemWithUnit(info.Sys, defaultUnit))
-		heapSys = append(heapSys, formatMemWithUnit(info.HeapSys, defaultUnit))
-		heapAlloc = append(heapAlloc, formatMemWithUnit(info.HeapAlloc, defaultUnit))
-		heapInuse = append(heapInuse, formatMemWithUnit(info.HeapInuse, defaultUnit))
-		heapReleased = append(heapReleased, formatMemWithUnit(info.HeapReleased, defaultUnit))
-		heapIdle = append(heapIdle, formatMemWithUnit(info.HeapIdle, defaultUnit))
-		VMS = append(VMS, formatMemWithUnit(info.VMS, defaultUnit))
-		RSS = append(RSS, formatMemWithUnit(info.RSS, defaultUnit))
+	for _, m := range msgs {
+		t = append(t, time.Unix(m.Timestamp, 0).Format("2006-01-02 15:04:05"))
+		sys = append(sys, formatMemWithUnit(m.Sys, defaultUnit))
+		heapSys = append(heapSys, formatMemWithUnit(m.HeapSys, defaultUnit))
+		heapAlloc = append(heapAlloc, formatMemWithUnit(m.HeapAlloc, defaultUnit))
+		heapInuse = append(heapInuse, formatMemWithUnit(m.HeapInuse, defaultUnit))
+		heapReleased = append(heapReleased, formatMemWithUnit(m.HeapReleased, defaultUnit))
+		heapIdle = append(heapIdle, formatMemWithUnit(m.HeapIdle, defaultUnit))
+		VMS = append(VMS, formatMemWithUnit(m.VMS, defaultUnit))
+		RSS = append(RSS, formatMemWithUnit(m.RSS, defaultUnit))
 	}
 
 	line := charts.NewLine()
 	line.SetGlobalOptions(
 		charts.InitOpts{PageTitle: "gomemanalysis", Theme: charts.ThemeType.Infographic},
 	)
+	fmt.Println("defaultUnit:", defaultUnit)
 	line.Title = "unit：" + unitString[defaultUnit]
 	line.AddXAxis(t)
 	opts := charts.LineOpts{Smooth: true}
